@@ -1,16 +1,16 @@
- 
-const express = require('express');
-const db = require('../config/database');
-const { authenticate } = require('../middleware/auth');
+import express from 'express';
+import db from '../config/database.js';
+import { authenticate } from '../middleware/auth.js';
+
 const router = express.Router();
 
 // Important: All routes require authentication
 router.use(authenticate);
 
-// Note: Get all users (sorted by last login time - requirement)
+// Note: Get all users (sorted by last login time)
 router.get('/', async (req, res) => {
   try {
-    const [users] = await db.execute(`
+    const result = await db.query(`
       SELECT 
         id,
         name,
@@ -23,8 +23,9 @@ router.get('/', async (req, res) => {
       ORDER BY last_login_time DESC NULLS LAST
     `);
 
-    res.json(users);
+    res.json(result.rows);
   } catch (error) {
+    console.error('Get users error:', error);
     res.status(500).json({ message: 'Failed to fetch users.' });
   }
 });
@@ -38,13 +39,14 @@ router.post('/block', async (req, res) => {
       return res.status(400).json({ message: 'User IDs are required.' });
     }
 
-    await db.execute(
-      'UPDATE users SET status = "blocked" WHERE id IN (?)',
-      [userIds]
+    await db.query(
+      'UPDATE users SET status = $1 WHERE id = ANY($2)',
+      ['blocked', userIds]
     );
 
     res.json({ message: 'Users blocked successfully.' });
   } catch (error) {
+    console.error('Block users error:', error);
     res.status(500).json({ message: 'Failed to block users.' });
   }
 });
@@ -54,29 +56,31 @@ router.post('/unblock', async (req, res) => {
   try {
     const { userIds } = req.body;
     
-    await db.execute(
-      'UPDATE users SET status = "active" WHERE id IN (?)',
-      [userIds]
+    await db.query(
+      'UPDATE users SET status = $1 WHERE id = ANY($2)',
+      ['active', userIds]
     );
 
     res.json({ message: 'Users unblocked successfully.' });
   } catch (error) {
+    console.error('Unblock users error:', error);
     res.status(500).json({ message: 'Failed to unblock users.' });
   }
 });
 
-// Nota bene: Delete users (permanent deletion - requirement)
+// Nota bene: Delete users (permanent deletion)
 router.post('/delete', async (req, res) => {
   try {
     const { userIds } = req.body;
     
-    await db.execute(
-      'DELETE FROM users WHERE id IN (?)',
+    await db.query(
+      'DELETE FROM users WHERE id = ANY($1)',
       [userIds]
     );
 
     res.json({ message: 'Users deleted successfully.' });
   } catch (error) {
+    console.error('Delete users error:', error);
     res.status(500).json({ message: 'Failed to delete users.' });
   }
 });
@@ -84,14 +88,20 @@ router.post('/delete', async (req, res) => {
 // Important: Delete unverified users
 router.post('/delete-unverified', async (req, res) => {
   try {
-    await db.execute(
-      'DELETE FROM users WHERE status = "unverified"'
+    const result = await db.query(
+      'DELETE FROM users WHERE status = $1 RETURNING id',
+      ['unverified']
     );
 
-    res.json({ message: 'Unverified users deleted successfully.' });
+    res.json({ 
+      message: `Unverified users deleted successfully.`,
+      deletedCount: result.rows.length
+    });
   } catch (error) {
+    console.error('Delete unverified error:', error);
     res.status(500).json({ message: 'Failed to delete unverified users.' });
   }
 });
 
-module.exports = router;
+// Important: Default export
+export default router;

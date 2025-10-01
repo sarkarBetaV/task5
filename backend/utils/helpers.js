@@ -5,13 +5,7 @@ export function getUniqIdValue() {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
-// Note: You can add other utility functions here later
-export function formatDate(date) {
-  return new Date(date).toLocaleString();
-}
-
-// Nota bene: Export all utilities
+// Note: Export other utility functions if needed
 export default {
-  getUniqIdValue,
-  formatDate
+  getUniqIdValue
 };

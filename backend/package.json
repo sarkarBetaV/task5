@@ -1,6 +1,7 @@
 {
   "name": "user-management-backend",
   "type": "module",
+  "version": "1.0.0",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js"

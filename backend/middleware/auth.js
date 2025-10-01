@@ -1,6 +1,5 @@
- 
-const jwt = require('jsonwebtoken');
-const db = require('../config/database');
+import jwt from 'jsonwebtoken';
+import db from '../config/database.js';
 
 // Important: Authentication middleware
 const authenticate = async (req, res, next) => {
@@ -11,19 +10,19 @@ const authenticate = async (req, res, next) => {
       return res.status(401).json({ message: 'Access denied. No token provided.' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
     
-    // Note: Check if user exists and isn't blocked (requirement)
-    const [users] = await db.execute(
-      'SELECT id, name, email, status FROM users WHERE id = ?',
+    // Note: Check if user exists and isn't blocked
+    const result = await db.query(
+      'SELECT id, name, email, status FROM users WHERE id = $1',
       [decoded.userId]
     );
 
-    if (users.length === 0) {
+    if (result.rows.length === 0) {
       return res.status(401).json({ message: 'User not found.' });
     }
 
-    const user = users[0];
+    const user = result.rows[0];
     
     // Nota bene: Redirect condition for blocked users
     if (user.status === 'blocked') {
@@ -40,4 +39,4 @@ const authenticate = async (req, res, next) => {
   }
 };
 
-module.exports = { authenticate };
+export { authenticate };

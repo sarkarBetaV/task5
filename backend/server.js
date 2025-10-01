@@ -13,11 +13,12 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Nota bene: Middleware
+// Nota bene: CORS configuration
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://user-management-frontend.onrender.com'] // Update this!
-    : ['http://localhost:3000'],
+  origin: [
+    'https://user-management-frontend.onrender.com',
+    'http://localhost:3000'
+  ],
   credentials: true
 }));
 
