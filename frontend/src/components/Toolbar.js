@@ -1,11 +1,10 @@
 import React from 'react';
 import axios from 'axios';
+import API_BASE_URL from '../config';
 
 const Toolbar = ({ selectedUsers, onUsersUpdate, onMessage, currentUser }) => {
-  // Important: Check if current user is in selection
   const isCurrentUserSelected = selectedUsers.includes(currentUser.id);
 
-  // Note: Handle block users
   const handleBlock = async () => {
     if (selectedUsers.length === 0) {
       onMessage('Please select users to block.');
@@ -14,7 +13,7 @@ const Toolbar = ({ selectedUsers, onUsersUpdate, onMessage, currentUser }) => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post('/api/users/block', 
+      await axios.post(`${API_BASE_URL}/api/users/block`, 
         { userIds: selectedUsers },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -30,7 +29,6 @@ const Toolbar = ({ selectedUsers, onUsersUpdate, onMessage, currentUser }) => {
     }
   };
 
-  // Nota bene: Handle unblock users
   const handleUnblock = async () => {
     if (selectedUsers.length === 0) {
       onMessage('Please select users to unblock.');
@@ -39,7 +37,7 @@ const Toolbar = ({ selectedUsers, onUsersUpdate, onMessage, currentUser }) => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post('/api/users/unblock', 
+      await axios.post(`${API_BASE_URL}/api/users/unblock`, 
         { userIds: selectedUsers },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -55,7 +53,6 @@ const Toolbar = ({ selectedUsers, onUsersUpdate, onMessage, currentUser }) => {
     }
   };
 
-  // Important: Handle delete users
   const handleDelete = async () => {
     if (selectedUsers.length === 0) {
       onMessage('Please select users to delete.');
@@ -70,14 +67,13 @@ const Toolbar = ({ selectedUsers, onUsersUpdate, onMessage, currentUser }) => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post('/api/users/delete', 
+      await axios.post(`${API_BASE_URL}/api/users/delete`, 
         { userIds: selectedUsers },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
       onMessage('Users deleted successfully.');
       
-      // Note: If current user was deleted, log them out
       if (isCurrentUserSelected) {
         handleAuthFailure();
       } else {
@@ -92,11 +88,10 @@ const Toolbar = ({ selectedUsers, onUsersUpdate, onMessage, currentUser }) => {
     }
   };
 
-  // Important: Handle delete unverified users
   const handleDeleteUnverified = async () => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post('/api/users/delete-unverified', 
+      await axios.post(`${API_BASE_URL}/api/users/delete-unverified`, 
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -112,14 +107,12 @@ const Toolbar = ({ selectedUsers, onUsersUpdate, onMessage, currentUser }) => {
     }
   };
 
-  // Note: Handle authentication failure
   const handleAuthFailure = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     window.location.reload();
   };
 
-  // Important: Toolbar button disabled states
   const isBlockDisabled = selectedUsers.length === 0;
   const isUnblockDisabled = selectedUsers.length === 0;
   const isDeleteDisabled = selectedUsers.length === 0;
@@ -141,7 +134,7 @@ const Toolbar = ({ selectedUsers, onUsersUpdate, onMessage, currentUser }) => {
         disabled={isUnblockDisabled}
         title="Unblock selected users"
       >
-        <i className="bi bi-unlock"></i> Unblock
+        Unblock
       </button>
       
       <button
@@ -150,7 +143,7 @@ const Toolbar = ({ selectedUsers, onUsersUpdate, onMessage, currentUser }) => {
         disabled={isDeleteDisabled}
         title="Delete selected users"
       >
-        <i className="bi bi-trash"></i> Delete
+        Delete
       </button>
       
       <button
@@ -158,7 +151,7 @@ const Toolbar = ({ selectedUsers, onUsersUpdate, onMessage, currentUser }) => {
         onClick={handleDeleteUnverified}
         title="Delete all unverified users"
       >
-        <i className="bi bi-trash"></i> Delete Unverified
+        Delete Unverified
       </button>
       
       <div className="ms-auto text-muted">

@@ -9,7 +9,6 @@ const Login = ({ onLogin, onSwitchToRegister, onMessage }) => {
   });
   const [loading, setLoading] = useState(false);
 
-  // Important: Handle form input changes
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -17,7 +16,6 @@ const Login = ({ onLogin, onSwitchToRegister, onMessage }) => {
     });
   };
 
-  // Note: Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);

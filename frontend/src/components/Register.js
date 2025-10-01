@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import API_BASE_URL from '../config';
 
 const Register = ({ onSwitchToLogin, onMessage }) => {
   const [formData, setFormData] = useState({
@@ -9,7 +10,6 @@ const Register = ({ onSwitchToLogin, onMessage }) => {
   });
   const [loading, setLoading] = useState(false);
 
-  // Important: Handle form input changes
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -17,13 +17,12 @@ const Register = ({ onSwitchToLogin, onMessage }) => {
     });
   };
 
-  // Note: Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      await axios.post('/api/auth/register', formData);
+      await axios.post(`${API_BASE_URL}/api/auth/register`, formData);
       onMessage('Registration successful! Please check your email for verification.');
       onSwitchToLogin();
     } catch (error) {
@@ -85,7 +84,7 @@ const Register = ({ onSwitchToLogin, onMessage }) => {
                     value={formData.password}
                     onChange={handleChange}
                     required
-                    minLength="1" // Important: Allow any non-empty password
+                    minLength="1"
                   />
                   <div className="form-text">Any non-empty password is acceptable.</div>
                 </div>

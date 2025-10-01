@@ -1,6 +1,6 @@
- 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import API_BASE_URL from '../config';
 import Toolbar from './Toolbar';
 
 const UserTable = ({ currentUser, onMessage }) => {
@@ -8,16 +8,14 @@ const UserTable = ({ currentUser, onMessage }) => {
   const [selectedUsers, setSelectedUsers] = useState(new Set());
   const [loading, setLoading] = useState(true);
 
-  // Important: Fetch users on component mount
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  // Note: Fetch users from API
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('/api/users', {
+      const response = await axios.get(`${API_BASE_URL}/api/users`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsers(response.data);
@@ -32,14 +30,12 @@ const UserTable = ({ currentUser, onMessage }) => {
     }
   };
 
-  // Nota bene: Handle logout on auth failure
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     window.location.reload();
   };
 
-  // Important: Handle individual user selection
   const handleUserSelect = (userId) => {
     const newSelected = new Set(selectedUsers);
     if (newSelected.has(userId)) {
@@ -50,7 +46,6 @@ const UserTable = ({ currentUser, onMessage }) => {
     setSelectedUsers(newSelected);
   };
 
-  // Note: Handle select all/deselect all
   const handleSelectAll = (e) => {
     if (e.target.checked) {
       setSelectedUsers(new Set(users.map(user => user.id)));
@@ -59,17 +54,14 @@ const UserTable = ({ currentUser, onMessage }) => {
     }
   };
 
-  // Important: Check if all users are selected
   const isAllSelected = users.length > 0 && selectedUsers.size === users.length;
 
-  // Note: Format date for display
   const formatDate = (dateString) => {
     if (!dateString) return 'Never';
     const date = new Date(dateString);
     return date.toLocaleString();
   };
 
-  // Important: Get status badge class
   const getStatusBadge = (status) => {
     switch (status) {
       case 'active': return 'bg-success';
