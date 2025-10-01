@@ -3,7 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Login from './components/Login';
 import Register from './components/Register';
 import UserTable from './components/UserTable';
-import './App.css';
+//import './App.css';
 
 function App() {
   const [currentView, setCurrentView] = useState('login');
