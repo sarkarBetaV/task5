@@ -6,32 +6,36 @@ import db from './config/database.js';
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
 
+// Important: Initialize express app first
 const app = express();
 
-// Important: Get __dirname for ES modules
+// Note: Get __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Note: CORS configuration
+// Nota bene: Middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://your-frontend-url.onrender.com'] // Update with your actual frontend URL
+    ? ['https://user-management-frontend.onrender.com'] // Update this!
     : ['http://localhost:3000'],
   credentials: true
 }));
 
 app.use(express.json());
 
-// Nota bene: API routes
+// Important: API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 
-// Important: Serve frontend in production - PUT THIS AT THE END
+// Health check route
+app.get('/api/health', (req, res) => {
+  res.json({ message: 'Server is running!' });
+});
+
+// Important: Serve frontend in production - MUST BE LAST
 if (process.env.NODE_ENV === 'production') {
-  // Serve static files from frontend build
   app.use(express.static(path.join(__dirname, '../frontend/build')));
   
-  // Handle React routing, return all requests to React app
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
   });
@@ -39,5 +43,5 @@ if (process.env.NODE_ENV === 'production') {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
 });
