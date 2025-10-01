@@ -1,16 +1,10 @@
- 
-const mysql = require('mysql2/promise');
-require('dotenv').config();
+import pkg from 'pg';
+const { Pool } = pkg;
 
-// Important: Database connection pool
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'user_management_app',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+// Important: PostgreSQL configuration for Render
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
-module.exports = pool;
+export default pool;
