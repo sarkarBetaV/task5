@@ -1,20 +1,15 @@
--- Important: Create database first
-CREATE DATABASE user_management_app;
-
-USE user_management_app;
-
--- Note: Users table with unique index on email
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+-- Important: Create users table for PostgreSQL
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE, -- Nota bene: This creates unique index
+    email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    status ENUM('unverified', 'active', 'blocked') DEFAULT 'unverified',
-    last_login_time TIMESTAMP NULL,
-    registration_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    status VARCHAR(20) DEFAULT 'unverified' CHECK (status IN ('unverified', 'active', 'blocked')),
+    last_login_time TIMESTAMPTZ,
+    registration_time TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Important: Create explicit unique index (requirement)
-CREATE UNIQUE INDEX idx_email_unique ON users(email);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_email_unique ON users(email);
