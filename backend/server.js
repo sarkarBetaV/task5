@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import bcrypt from 'bcryptjs';
 import db from './config/database.js';
 
 const app = express();
@@ -24,7 +25,7 @@ async function testDatabase() {
   }
 }
 
-// Simple health check - NO routes import needed yet
+// Simple health check
 app.get('/api/health', async (req, res) => {
   const dbConnected = await testDatabase();
   
@@ -36,7 +37,40 @@ app.get('/api/health', async (req, res) => {
   });
 });
 
-// Simple test registration endpoint
+// Database check endpoint
+app.get('/api/check-database', async (req, res) => {
+  try {
+    // Check if table exists
+    const tableCheck = await db.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'users'
+      );
+    `);
+
+    // Check if we can query the table
+    let userCount = 0;
+    if (tableCheck.rows[0].exists) {
+      const countResult = await db.query('SELECT COUNT(*) FROM users');
+      userCount = parseInt(countResult.rows[0].count);
+    }
+
+    res.json({
+      table_exists: tableCheck.rows[0].exists,
+      user_count: userCount,
+      database_url: process.env.DATABASE_URL ? 'Set' : 'Not set'
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+      database_url: process.env.DATABASE_URL ? 'Set' : 'Not set'
+    });
+  }
+});
+
+// Registration endpoint
 app.post('/api/auth/register', async (req, res) => {
   console.log('📝 Registration attempt:', req.body);
   
@@ -47,30 +81,14 @@ app.post('/api/auth/register', async (req, res) => {
       return res.status(400).json({ message: 'All fields are required.' });
     }
 
-    // Test database connection first
-    try {
-      await db.query('SELECT 1');
-    } catch (dbError) {
-      return res.status(500).json({ message: 'Database not available' });
-    }
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    console.log('✅ Password hashed');
 
-    // Check if users table exists
-    const tableCheck = await db.query(`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name = 'users'
-      );
-    `);
-
-    if (!tableCheck.rows[0].exists) {
-      return res.status(500).json({ message: 'Users table does not exist' });
-    }
-
-    // Simple insert (without password hashing for testing)
+    // Insert user
     const result = await db.query(
       'INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id',
-      [name, email, password] // Note: Plain password for testing
+      [name, email, hashedPassword]
     );
 
     console.log('✅ User created successfully');
@@ -90,7 +108,7 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
-// Simple test login endpoint
+// Login endpoint
 app.post('/api/auth/login', async (req, res) => {
   console.log('🔐 Login attempt:', req.body);
   
@@ -108,8 +126,9 @@ app.post('/api/auth/login', async (req, res) => {
 
     const user = result.rows[0];
     
-    // Simple password check (plain text for testing)
-    if (user.password !== password) {
+    // Compare hashed password
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
       return res.status(400).json({ message: 'Invalid password' });
     }
 
@@ -134,6 +153,7 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log('🚀 Backend server running on port', PORT);
   console.log('✅ Health endpoint: /api/health');
+  console.log('✅ Database check: /api/check-database');
   console.log('✅ Register endpoint: /api/auth/register');
   console.log('✅ Login endpoint: /api/auth/login');
 });
