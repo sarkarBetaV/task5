@@ -175,6 +175,65 @@ app.get("/api/users", async (req, res) => {
   }
 });
 
+// Block users endpoint
+app.post("/api/users/block", async (req, res) => {
+  console.log("🚫 Block users:", req.body);
+  try {
+    const { userIds } = req.body;
+    await db.query("UPDATE users SET status = $1 WHERE id = ANY($2)", [
+      "blocked",
+      userIds,
+    ]);
+    res.json({ message: "Users blocked successfully" });
+  } catch (error) {
+    console.error("Block error:", error);
+    res.status(500).json({ message: "Failed to block users" });
+  }
+});
+
+// Unblock users endpoint
+app.post("/api/users/unblock", async (req, res) => {
+  console.log("✅ Unblock users:", req.body);
+  try {
+    const { userIds } = req.body;
+    await db.query("UPDATE users SET status = $1 WHERE id = ANY($2)", [
+      "active",
+      userIds,
+    ]);
+    res.json({ message: "Users unblocked successfully" });
+  } catch (error) {
+    console.error("Unblock error:", error);
+    res.status(500).json({ message: "Failed to unblock users" });
+  }
+});
+
+// Delete users endpoint
+app.post("/api/users/delete", async (req, res) => {
+  console.log("🗑️ Delete users:", req.body);
+  try {
+    const { userIds } = req.body;
+    await db.query("DELETE FROM users WHERE id = ANY($1)", [userIds]);
+    res.json({ message: "Users deleted successfully" });
+  } catch (error) {
+    console.error("Delete error:", error);
+    res.status(500).json({ message: "Failed to delete users" });
+  }
+});
+
+// Delete unverified users endpoint
+app.post("/api/users/delete-unverified", async (req, res) => {
+  console.log("🧹 Delete unverified users");
+  try {
+    const result = await db.query("DELETE FROM users WHERE status = $1", [
+      "unverified",
+    ]);
+    res.json({ message: `Deleted ${result.rowCount} unverified users` });
+  } catch (error) {
+    console.error("Delete unverified error:", error);
+    res.status(500).json({ message: "Failed to delete unverified users" });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
