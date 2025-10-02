@@ -154,6 +154,27 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
+// Add users endpoint
+app.get("/api/users", async (req, res) => {
+  console.log("📊 Fetching users list");
+
+  try {
+    const result = await db.query(`
+      SELECT id, name, email, status, last_login_time, registration_time
+      FROM users 
+      ORDER BY last_login_time DESC NULLS LAST
+    `);
+
+    console.log(`✅ Found ${result.rows.length} users`);
+    res.json(result.rows);
+  } catch (error) {
+    console.error("❌ Error fetching users:", error.message);
+    res
+      .status(500)
+      .json({ message: "Failed to fetch users: " + error.message });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
