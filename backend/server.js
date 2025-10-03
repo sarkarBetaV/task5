@@ -6,10 +6,12 @@ import db from "./config/database.js";
 const app = express();
 
 // Important: Basic CORS
+// Replace the CORS configuration with:
 app.use(
   cors({
     origin: [
-      "https://user-management-frontend-62hx.onrender.com", // Your exact frontend URL
+      "https://user-management-frontend-d27c.onrender.com", // NEW frontend URL
+      "https://user-management-frontend-62hx.onrender.com", // OLD frontend URL (keep for backup)
       "http://localhost:3000",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -18,7 +20,7 @@ app.use(
   })
 );
 
-// Add this line after CORS setup
+// Keep this line:
 app.options("*", cors());
 
 app.use(express.json());
