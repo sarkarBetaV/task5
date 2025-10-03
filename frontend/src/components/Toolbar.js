@@ -118,43 +118,48 @@ const Toolbar = ({ selectedUsers, onUsersUpdate, onMessage, currentUser }) => {
   const isDeleteDisabled = selectedUsers.length === 0;
 
   return (
-    <div className="d-flex gap-2 mb-3 p-3 bg-light rounded">
+    <div className="d-flex gap-2 mb-3 p-3 bg-light rounded align-items-center">
       <button
-        className="btn btn-warning"
+        className="btn btn-warning d-flex align-items-center gap-2"
         onClick={handleBlock}
         disabled={isBlockDisabled}
         title="Block selected users"
       >
+        <i className="fas fa-ban"></i>
         Block
       </button>
       
       <button
-        className="btn btn-success"
+        className="btn btn-success d-flex align-items-center gap-2"
         onClick={handleUnblock}
         disabled={isUnblockDisabled}
         title="Unblock selected users"
       >
+        <i className="fas fa-check-circle"></i>
         Unblock
       </button>
       
       <button
-        className="btn btn-danger"
+        className="btn btn-danger d-flex align-items-center gap-2"
         onClick={handleDelete}
         disabled={isDeleteDisabled}
         title="Delete selected users"
       >
+        <i className="fas fa-trash"></i>
         Delete
       </button>
       
       <button
-        className="btn btn-outline-danger"
+        className="btn btn-outline-danger d-flex align-items-center gap-2"
         onClick={handleDeleteUnverified}
         title="Delete all unverified users"
       >
+        <i className="fas fa-user-times"></i>
         Delete Unverified
       </button>
       
-      <div className="ms-auto text-muted">
+      <div className="ms-auto text-muted d-flex align-items-center gap-2">
+        <i className="fas fa-users"></i>
         {selectedUsers.length} user(s) selected
       </div>
     </div>
